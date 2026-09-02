@@ -7,11 +7,11 @@ WORKDIR /app
 # Copy all codebase files into the container
 COPY . .
 
-# Enable corepack and install project dependencies internally
-RUN corepack enable && yarn install
+# Enable corepack, fetch the correct pnpm version, and run the install command
+RUN corepack enable && corepack prepare pnpm@latest --activate && pnpm install --frozen-lockfile
 
 # Expose the internal communications port 
 EXPOSE 8080
 
-# Execute the start script defined in package.json
-CMD ["yarn", "start"]
+# Execute the start script using pnpm
+CMD ["pnpm", "start"]
