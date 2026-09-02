@@ -10,7 +10,17 @@ WORKDIR /app
 # Copy all codebase files into the container
 COPY . .
 
-# Enable corepack, fetch the correct pnpm version, and run the install command
+# Force fix the absolute path crash by creating a system symbolic link
+RUN ln -s /app/packages /packages
+
+# Initialize a dummy git repository inside Render to trick the wrangler config tool
+RUN git config --global user.email "server@rec.room" && \
+    git config --global user.name "RecServer" && \
+    git init && \
+    git add . && \
+    git commit -m "Render execution init"
+
+# Enable corepack, fetch pnpm, and install project dependencies internally
 RUN corepack enable && corepack prepare pnpm@latest --activate && pnpm install --frozen-lockfile
 
 # Expose the internal communications port 
