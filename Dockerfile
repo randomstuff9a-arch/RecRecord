@@ -14,4 +14,4 @@ RUN corepack enable && corepack prepare pnpm@latest --activate && pnpm install -
 EXPOSE 8080
 
 # Run the project using its workspace-specific execution filter
-CMD ["pnpm", "--filter", "*", "run", "start"]
+CMD ["pnpm", "--filter", "*", "run", "dev"]
