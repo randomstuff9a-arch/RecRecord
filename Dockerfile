@@ -13,5 +13,5 @@ RUN corepack enable && corepack prepare pnpm@latest --activate && pnpm install -
 # Expose the internal communications port 
 EXPOSE 8080
 
-# Execute the start script using pnpm
-CMD ["pnpm", "start"]
+# Run the project using its workspace-specific execution filter
+CMD ["pnpm", "--filter", "*", "run", "start"]
