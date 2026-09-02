@@ -1,8 +1,8 @@
 # Use an official lightweight Node image
 FROM node:24.14.1-slim
 
-# Install system dependencies including Git and JQ
-RUN apt-get update && apt-get install -y git jq && rm -rf /var/lib/apt/lists/*
+# Install system dependencies including Git, JQ, and Nginx
+RUN apt-get update && apt-get install -y git jq nginx && rm -rf /var/lib/apt/lists/*
 
 # Set working directory inside the container
 WORKDIR /app
@@ -23,8 +23,18 @@ RUN git config --global user.email "server@rec.room" && \
 # Enable corepack, fetch pnpm, and install project dependencies internally
 RUN corepack enable && corepack prepare pnpm@latest --activate && pnpm install --frozen-lockfile
 
+# Configure a background proxy routing layer to expose the master API gateway (Wrangler defaults to 8787)
+RUN echo 'server { \
+    listen 8080; \
+    location / { \
+        proxy_pass http://127.0.0.1:8787; \
+        proxy_set_header Host $host; \
+        proxy_set_header X-Real-IP $remote_addr; \
+    } \
+}' > /etc/nginx/sites-available/default
+
 # Expose the internal communications port 
 EXPOSE 8080
 
-# Run the project using its workspace-specific execution filter
-CMD ["pnpm", "--filter", "*", "run", "dev"]
+# Start Nginx in the background and execute the workspace microservice apps sequentially
+CMD service nginx start && pnpm --filter "*" run dev
