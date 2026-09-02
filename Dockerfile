@@ -1,6 +1,9 @@
 # Use an official lightweight Node image
 FROM node:24.14.1-slim
 
+# Install system dependencies including Git
+RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
+
 # Set working directory inside the container
 WORKDIR /app
 
