@@ -1,8 +1,8 @@
 # Use an official lightweight Node image
 FROM node:24.14.1-slim
 
-# Install core system tools (Git and JQ)
-RUN apt-get update && apt-get install -y git jq && rm -rf /var/lib/apt/lists/*
+# Install system dependencies including Git, JQ, and Nginx
+RUN apt-get update && apt-get install -y git jq nginx && rm -rf /var/lib/apt/lists/*
 
 # Set working directory inside the container
 WORKDIR /app
@@ -23,12 +23,20 @@ RUN git config --global user.email "server@rec.room" && \
 # Enable corepack, fetch pnpm, and install project dependencies internally
 RUN corepack enable && corepack prepare pnpm@latest --activate && pnpm install --frozen-lockfile
 
-# Force wrangler dev to listen globally on port 8080 right from the source execution line
-ENV WRANGLER_PORT=8080
-ENV WRANGLER_IP=0.0.0.0
+# Configure Nginx to proxy port 8080 straight to the www gateway workspace app execution block
+RUN echo 'server { \
+    listen 8080; \
+    location / { \
+        proxy_pass http://127.0.0.1:8788; \
+        proxy_set_header Host $host; \
+        proxy_set_header X-Real-IP $remote_addr; \
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; \
+        proxy_set_header X-Forwarded-Proto $scheme; \
+    } \
+}' > /etc/nginx/sites-available/default
 
 # Expose the internal communications port 
 EXPOSE 8080
 
-# Launch the workspace modules with global environment network attachments
-CMD pnpm --filter "*" run dev --ip 0.0.0.0 --port 8080
+# Clean boot Nginx and launch the workspace app tasks normally
+CMD service nginx start && pnpm --filter "*" run dev
