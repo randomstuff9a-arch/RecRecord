@@ -23,11 +23,11 @@ RUN git config --global user.email "server@rec.room" && \
 # Enable corepack, fetch pnpm, and install project dependencies internally
 RUN corepack enable && corepack prepare pnpm@latest --activate && pnpm install --frozen-lockfile
 
-# Configure a background proxy routing layer to expose the master API gateway (Wrangler defaults to 8787)
+# Configure a background proxy routing layer to expose the master API gateway (WWW core targets 8788)
 RUN echo 'server { \
     listen 8080; \
     location / { \
-        proxy_pass http://127.0.0.1:8787; \
+        proxy_pass http://127.0.0.1:8788; \
         proxy_set_header Host $host; \
         proxy_set_header X-Real-IP $remote_addr; \
     } \
@@ -35,7 +35,6 @@ RUN echo 'server { \
 
 # Expose the internal communications port 
 EXPOSE 8080
-#Made by Arnie on the 3/09/26
 
 # Start Nginx in the background and execute the workspace microservice apps sequentially
 CMD service nginx start && pnpm --filter "*" run dev
