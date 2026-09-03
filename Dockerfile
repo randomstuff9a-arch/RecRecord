@@ -35,6 +35,7 @@ RUN echo 'server { \
 
 # Expose the internal communications port 
 EXPOSE 8080
+#Made by Arnie on the 3/09/26
 
 # Start Nginx in the background and execute the workspace microservice apps sequentially
 CMD service nginx start && pnpm --filter "*" run dev
