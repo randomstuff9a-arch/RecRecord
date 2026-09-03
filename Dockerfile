@@ -23,11 +23,11 @@ RUN git config --global user.email "server@rec.room" && \
 # Enable corepack, fetch pnpm, and install project dependencies internally
 RUN corepack enable && corepack prepare pnpm@latest --activate && pnpm install --frozen-lockfile
 
-# Configure Nginx to proxy port 8080 straight to the www gateway workspace app execution block
+# Configure Nginx to bridge external port 8080 to our open worker instance on port 8787
 RUN echo 'server { \
     listen 8080; \
     location / { \
-        proxy_pass http://127.0.0.1:8788; \
+        proxy_pass http://0.0.0; \
         proxy_set_header Host $host; \
         proxy_set_header X-Real-IP $remote_addr; \
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; \
@@ -38,5 +38,5 @@ RUN echo 'server { \
 # Expose the internal communications port 
 EXPOSE 8080
 
-# Clean boot Nginx and launch the workspace app tasks normally
-CMD service nginx start && pnpm --filter "*" run dev
+# Start Nginx and launch the core workspace app with a remote-public binding layout
+CMD service nginx start && pnpm --filter "www" run dev --ip 0.0.0.0 --port 8787 --remote
