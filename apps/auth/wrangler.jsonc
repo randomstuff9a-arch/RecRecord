@@ -13,7 +13,7 @@
 		{
 			"binding": "DB",
 			"database_name": "recflare",
-			"database_id": "local",
+			"database_id": "cfe18ba6-c17b-41f9-9043-b354699954a1",
 			"migrations_dir": "migrations",
 			"migrations_table": "d1_migrations_auth"
 		}
